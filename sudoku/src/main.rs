@@ -3,7 +3,7 @@ const NUMBER_LIMIT: usize = SCALE_FACTOR * SCALE_FACTOR;
 const DEBUG: bool = true;
 
 fn box_num(row: usize, col: usize) -> usize {
-	/* Takes the zero-indexed row and column number and returns the zero-indexed box number of the given entry. Boxes
+	/* Takes the zero-indexed row and column number and returns the zero-indexed box number of the given entry. sectors
 	are numbered from left to right, then top to bottom. 
 	
 	Example: for a 3x3, box 0 is top left, box 2 is top right, box 6 is bottom left, 
@@ -15,20 +15,38 @@ fn box_num(row: usize, col: usize) -> usize {
 	return SCALE_FACTOR * box_row + box_col;
 }
 
-#[derive(Copy, Clone)]
+/* TODO I might not be able to pass around the pointer to this struct with Copy derived */
+#[derive(Debug, Copy, Clone)]
 struct Entry {
 	value: usize,
 	row: usize,
 	col: usize,
-	boxx: usize,
-}
-
-struct Board {
-	entries: [[Entry; NUMBER_LIMIT]; NUMBER_LIMIT],
+	sector: usize,
 }
 
 impl Entry {
+	fn is_valid(&self) -> bool {
+		/* This is the thorough validation check to make sure all fields are in bounds. */
+		if self.value > NUMBER_LIMIT {
+			return false;
+		}
+		if self.row >= NUMBER_LIMIT {
+			return false;
+		}
+		if self.col >= NUMBER_LIMIT {
+			return false;
+		}
+		if self.sector >= NUMBER_LIMIT {
+			return false;
+		}
 
+		return true;
+	}
+}
+
+#[derive(Debug)]
+struct Board {
+	entries: [[Entry; NUMBER_LIMIT]; NUMBER_LIMIT],
 }
 
 impl Board {
@@ -38,7 +56,7 @@ impl Board {
 		let mut board = Board { 
 			entries: [
 				[
-					Entry { value: 0, row: 0, col: 0, boxx: 0 }; NUMBER_LIMIT
+					Entry { value: 0, row: 0, col: 0, sector: 0 }; NUMBER_LIMIT
 				]; NUMBER_LIMIT
 			]
 		};
@@ -52,7 +70,7 @@ impl Board {
 				square.value = arr[i][j];
 				square.row = i;
 				square.col = j;
-				square.boxx = box_num(i, j);
+				square.sector = box_num(i, j);
 				j += 1;
 			}
 			i += 1;
@@ -70,13 +88,12 @@ impl Board {
 		/* Position is used to map to numeric entry value */
 		let mut rows: [[bool; NUMBER_LIMIT]; NUMBER_LIMIT] = [[false; NUMBER_LIMIT]; NUMBER_LIMIT];
 		let mut cols: [[bool; NUMBER_LIMIT]; NUMBER_LIMIT] = [[false; NUMBER_LIMIT]; NUMBER_LIMIT];
-		let mut boxes: [[bool; NUMBER_LIMIT]; NUMBER_LIMIT] = [[false; NUMBER_LIMIT]; NUMBER_LIMIT];
+		let mut sectors: [[bool; NUMBER_LIMIT]; NUMBER_LIMIT] = [[false; NUMBER_LIMIT]; NUMBER_LIMIT];
 
 		for row in self.entries.iter() {
 			for entry in row.iter() {
-				if (entry.value - 1) > NUMBER_LIMIT {
+				if !entry.is_valid() {
 					/* This is out of range, so an error is more appropriate */
-					/* TODO we should make a function to validate all of the entry fields. Just in case.*/
 					println!("{}, {} contains invalid entry.", entry.row, entry.col);
 					return false;
 				} else if entry.value != 0 {
@@ -102,15 +119,15 @@ impl Board {
 						/* Mark that we've seen this entry in this column */
 						cols[entry.col][entry.value - 1] = true;
 					}
-					if boxes[entry.boxx][entry.value - 1] == true {
+					if sectors[entry.sector][entry.value - 1] == true {
 						/* We've seen this entry in this box already */
 						if DEBUG {
-							println!("{}, {}: {} already present in box {}.", entry.row, entry.col, entry.value, entry.boxx);
+							println!("{}, {}: {} already present in box {}.", entry.row, entry.col, entry.value, entry.sector);
 						}
 						return false;
 					} else {
 						/* Mark that we've seen this entry in this box */
-						boxes[entry.boxx][entry.value - 1] = true;
+						sectors[entry.sector][entry.value - 1] = true;
 					}
 				}
 
@@ -150,4 +167,19 @@ fn main() {
 	test_board.print();
 
     println!("{}", test_board.is_valid());
+
+	let empty_array = [[0, 0, 0, 0, 0, 0, 0, 0, 0],
+	    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0]];
+
+	let empty_board = Board::new_from_array(empty_array);
+	empty_board.print();
+
+    println!("{}", empty_board.is_valid());
 }
