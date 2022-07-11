@@ -17,15 +17,25 @@ pub fn box_num(row: usize, col: usize) -> usize {
 }
 
 /* TODO I might not be able to pass around the pointer to this struct with Copy derived */
+/* For each entry, value represents the value placed in the cell (or blank, if value is 0) */
 #[derive(Debug, Copy, Clone)]
 pub struct Entry {
 	pub value: usize,
 	pub row: usize,
 	pub col: usize,
 	pub sector: usize,
+    pub options: [bool; NUMBER_LIMIT], // true = is possible, false = not possible for each index
 }
 
 impl Entry {
+    pub fn init(&mut self, row: usize, col: usize, value: usize) {
+        self.value = value;
+        self.row = row;
+        self.col = col;
+        self.sector = box_num(row, col);
+        self.options = [true; NUMBER_LIMIT];
+    }
+
 	pub fn is_valid(&self) -> bool {
 		/* This is the thorough validation check to make sure all fields are in bounds. */
 		if self.value > NUMBER_LIMIT {
@@ -40,14 +50,43 @@ impl Entry {
 		if self.sector >= NUMBER_LIMIT {
 			return false;
 		}
+        if !self.has_options() {
+            return false;
+        }
 
 		return true;
 	}
+
+    /* Returns true if there is still a possible option to place into the value field. Always returns
+       true if the value field is specified to a valid number. */
+    pub fn has_options(&self) -> bool {
+        if self.value > 0 && self.value <= NUMBER_LIMIT {
+            return true;
+        } else {
+            for option in self.options {
+                /* The only invalid state is if the cell's value has not been specified
+                   and there are no possible options left. */
+                if option == true {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+}
+
+impl PartialEq for Entry {
+    fn eq(&self, other: &Self) -> bool {
+        return self.value  == other.value && 
+               self.row    == other.row && 
+               self.col    == other.col && 
+               self.sector == other.sector;
+    }
 }
 
 #[derive(Debug)]
 pub struct Board {
-	entries: [[Entry; NUMBER_LIMIT]; NUMBER_LIMIT],
+	pub entries: [[Entry; NUMBER_LIMIT]; NUMBER_LIMIT],
 }
 
 impl Board {
@@ -57,7 +96,13 @@ impl Board {
 		let mut board = Board { 
 			entries: [
 				[
-					Entry { value: 0, row: 0, col: 0, sector: 0 }; NUMBER_LIMIT
+					Entry { 
+                        value: 0, 
+                        row: 0, 
+                        col: 0, 
+                        sector: 0,
+                        options: [true; NUMBER_LIMIT]
+                    }; NUMBER_LIMIT
 				]; NUMBER_LIMIT
 			]
 		};
@@ -68,10 +113,8 @@ impl Board {
 		for row in board.entries.iter_mut() {
 			j = 0;
 			for square in row.iter_mut() {
-				square.value = arr[i][j];
-				square.row = i;
-				square.col = j;
-				square.sector = box_num(i, j);
+				let value = arr[i][j];
+                square.init(i, j, value);
 				j += 1;
 			}
 			i += 1;
@@ -82,7 +125,7 @@ impl Board {
 	pub fn is_valid(&self) -> bool {
 		/* Checks if the current board is a valid Sudoku board according to Sudoku rules
 		   (each number appears exactly once in each row, column, and subsquare). Unset
-		   entries are considered valid.
+		   entries are considered valid. Options are not validated.
 		*/ 
 
 		/* Start with each row, column, and box empty. Iterate through each entry of the sudoku and check for collisions */
@@ -137,6 +180,18 @@ impl Board {
 
 		return true;
 	}
+
+    /* Returns true if all values have been filled in and are valid */
+    pub fn is_solved(&self) -> bool {
+		for row in self.entries.iter() {
+			for entry in row.iter() {
+                if entry.value == 0 {
+                    return false;
+                }
+            }
+        }
+        return self.is_valid();
+    }
 	
 	pub fn print(&self) {
 		/* Prints out the entire board in a pretty format. */
