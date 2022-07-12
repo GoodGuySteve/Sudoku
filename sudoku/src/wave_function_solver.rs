@@ -15,13 +15,27 @@ use crate::board::Entry;
 /* Takes a board and removes all options that are invalidated by basic Sudoku rules
    (meaning those options that already exist in their row, column, or sector) */
 pub fn collapse_options(board: &mut Board) {
-    for board_line in board.entries {
-        for mut entry in board_line {
-            for (optionIndex, isOption) in entry.options.iter().enumerate() {
+    /*for board_line in board.entries.iter_mut() {
+        for entry in board_line.iter_mut() {
+            for option_index in 0..(entry.options.len() - 1) {
                 /* Options is an array of booleans, with each index corresponding to 
                    a value. Since Sudoku is 0-indexed, we need to add 1 */
-                if *isOption && !can_entry_have_value(*board, entry, optionIndex + 1) {
-                    entry.options[optionIndex] = false;
+                if entry.options[option_index] && !can_entry_have_value(board, entry, option_index + 1) {
+                    entry.options[option_index] = false;
+                }
+            }
+        }
+    }*/
+    for row in 0..(board.entries.len() - 1) {
+        let board_line = &board.entries[row];
+        for col in 0..(board_line.len() - 1) {
+            let entry = &board_line[col];
+            for option_index in 0..(entry.options.len() - 1) {
+                /* Options is an array of booleans, with each index corresponding to 
+                   a value. Since Sudoku is 0-indexed, we need to add 1 */
+                if entry.options[option_index] && !can_entry_have_value(board, entry, option_index + 1) {
+                    let mut options = board.entries[row][col].options;
+                    options[option_index] = false;
                 }
             }
         }
@@ -30,7 +44,7 @@ pub fn collapse_options(board: &mut Board) {
 
 /* Returns true if putting the suggested value into the given entry of the board
    does not violate Sudoku constraints. */
-fn can_entry_have_value(board: Board, entry: Entry, value: usize) -> bool {
+fn can_entry_have_value(board: &Board, entry: &Entry, value: usize) -> bool {
     
     let row = entry.row;
     let col = entry.col;
@@ -42,7 +56,7 @@ fn can_entry_have_value(board: Board, entry: Entry, value: usize) -> bool {
                 if e.value == value {
                     // This value already exists in the row/column/sector, so reject
                     // (unless we just compared the same object)
-                    if e != entry {
+                    if e != *entry {
                         return false;
                     }
                 }
