@@ -17,6 +17,11 @@ pub fn solve(board: &mut Board) {
     collapse_options(board);
 
     // TODO guess, collapse, and repeat
+    // TODO sort for smallest number of options
+    // TODO push old state onto a stack
+    // TODO make guess
+    //   TODO options of 0 means broke and backtrack, no options at all means solved
+    // TODO collapse options and repeat
 }
 
 /* Takes a board and removes all options that are invalidated by basic Sudoku rules
