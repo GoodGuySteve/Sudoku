@@ -16,6 +16,10 @@ pub fn box_num(row: usize, col: usize) -> usize {
 	return SCALE_FACTOR * box_row + box_col;
 }
 
+pub fn entry_index(row: usize, col: usize) -> usize {
+	return col * NUMBER_LIMIT + row;
+}
+
 /* TODO I might not be able to pass around the pointer to this struct with Copy derived */
 /* For each entry, value represents the value placed in the cell (or blank, if value is 0) */
 #[derive(Debug, Copy, Clone)]
@@ -84,7 +88,7 @@ impl PartialEq for Entry {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct Board {
 	pub entries: [Entry; NUMBER_LIMIT * NUMBER_LIMIT],
 }

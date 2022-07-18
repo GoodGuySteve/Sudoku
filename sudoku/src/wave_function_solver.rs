@@ -11,17 +11,54 @@ use crate::constants::NUMBER_LIMIT;
 
 use crate::board::Board;
 use crate::board::Entry;
+use crate::board::entry_index;
 
-pub fn solve(board: &mut Board) {
+// Attempts to solve a sudoku board recursively. Returns true on success, false on failure.
+pub fn solve(board: &mut Board) -> bool {
     // Start by making sure all the options are resolved according to sudoku rules
     collapse_options(board);
 
     // TODO guess, collapse, and repeat
     // TODO sort for smallest number of options
-    // TODO push old state onto a stack
-    // TODO make guess
-    //   TODO options of 0 means broke and backtrack, no options at all means solved
-    // TODO collapse options and repeat
+
+    // First, create an array of the unfilled entries
+    //let mut entriesAsVec: Vec<Entry> = board.entries.iter().cloned().collect();
+    let entries_as_vec_ref: Vec<&Entry> = board.entries.iter().collect();
+    let mut unfilled_entries: Vec<&Entry> = entries_as_vec_ref.iter().cloned().filter(|e| e.value == 0).collect();
+    if unfilled_entries.len() == 0 {
+        // All entries have been filled - the puzzle is solved.
+        return true;
+    }
+
+    // Sort all entries by how many options they have available. We want to pick the 
+    // one with the least options.
+    unfilled_entries.sort_by(|a, b| a.options.iter().filter(|c| **c == true).count().cmp(
+                           &b.options.iter().filter(|c| **c == true).count()));
+    let guess = unfilled_entries[0];
+
+    // For simplicity, we just find the first of the options that is possible and guess it.
+    let mut guess_value = 0;
+    for i in 1..(NUMBER_LIMIT) {
+        if guess.options[i - 1] == true {
+            guess_value = i;
+
+            // Now try putting the guess in the cell and solving.
+            let mut new_board = board.clone();
+            new_board.entries[entry_index(guess.row, guess.col)].value = guess_value;
+        
+            if solve(&mut new_board) {
+                // Our guess was successful, so pass it up the chain
+                *board = new_board;
+                return true;
+            }
+        }
+    }
+    if guess_value == 0 {
+        // This cell has no valid options to fill it, therefore the sudoku is unsolvable.
+        return false;
+    }
+
+    return false;
 }
 
 /* Takes a board and removes all options that are invalidated by basic Sudoku rules
@@ -40,12 +77,13 @@ pub fn collapse_options(board: &mut Board) {
     }*/
     for row in 0..(NUMBER_LIMIT - 1) {
         for col in 0..(NUMBER_LIMIT - 1) {
-            let entry = &board.entries[col*NUMBER_LIMIT + row];
+            let entry = &board.entries[entry_index(row, col)];
             for option_index in 0..(entry.options.len() - 1) {
                 /* Options is an array of booleans, with each index corresponding to 
                    a value. Since Sudoku is 0-indexed, we need to add 1 */
                 if entry.options[option_index] && !can_entry_have_value(board, entry, option_index + 1) {
-                    let mut options = board.entries[col*NUMBER_LIMIT + row].options;
+                    // TODO I think something is copying around here where it shouldn't be
+                    let mut options = board.entries[entry_index(row, col)].options;
                     options[option_index] = false;
                 }
             }

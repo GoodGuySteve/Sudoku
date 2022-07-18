@@ -49,7 +49,8 @@ fn main() {
 		[6, 7, 8, 9, 1, 2, 3, 4, 5],
 		[9, 1, 2, 3, 4, 5, 6, 7, 8]];
 
-	let near_complete_board = Board::new_from_array(near_complete_array);
+	let mut near_complete_board = Board::new_from_array(near_complete_array);
+	crate::wave_function_solver::solve(&mut near_complete_board);
 	near_complete_board.print();
 
     println!("near_complete_board is valid: {}, is solved:  {}", 
@@ -119,7 +120,9 @@ mod tests {
 		assert_eq!(true, test_board.is_valid());
 		assert_eq!(false, test_board.is_solved());
 
-		crate::wave_function_solver::solve(&mut test_board)
+		assert_eq!(true, crate::wave_function_solver::solve(&mut test_board));
+		assert_eq!(true, test_board.is_valid());
+		assert_eq!(true, test_board.is_solved());
 
 		// TODO solve and revalidate
 
