@@ -6,7 +6,7 @@
    4) If board is invalidated, back-track to the last state that still has available
       options to guess from
 */
-//use crate::constants;
+use crate::constants::NUMBER_LIMIT;
 //use constants::DEBUG;
 
 use crate::board::Board;
@@ -38,15 +38,14 @@ pub fn collapse_options(board: &mut Board) {
             }
         }
     }*/
-    for row in 0..(board.entries.len() - 1) {
-        let board_line = &board.entries[row];
-        for col in 0..(board_line.len() - 1) {
-            let entry = &board_line[col];
+    for row in 0..(NUMBER_LIMIT - 1) {
+        for col in 0..(NUMBER_LIMIT - 1) {
+            let entry = &board.entries[col*NUMBER_LIMIT + row];
             for option_index in 0..(entry.options.len() - 1) {
                 /* Options is an array of booleans, with each index corresponding to 
                    a value. Since Sudoku is 0-indexed, we need to add 1 */
                 if entry.options[option_index] && !can_entry_have_value(board, entry, option_index + 1) {
-                    let mut options = board.entries[row][col].options;
+                    let mut options = board.entries[col*NUMBER_LIMIT + row].options;
                     options[option_index] = false;
                 }
             }
@@ -62,15 +61,13 @@ fn can_entry_have_value(board: &Board, entry: &Entry, value: usize) -> bool {
     let col = entry.col;
     let sector = entry.sector;
 
-    for board_line in board.entries {
-        for e in board_line {
-            if e.row == row || e.col == col || e.sector == sector {
-                if e.value == value {
-                    // This value already exists in the row/column/sector, so reject
-                    // (unless we just compared the same object)
-                    if e != *entry {
-                        return false;
-                    }
+    for e in board.entries {
+        if e.row == row || e.col == col || e.sector == sector {
+            if e.value == value {
+                // This value already exists in the row/column/sector, so reject
+                // (unless we just compared the same object)
+                if e != *entry {
+                    return false;
                 }
             }
         }

@@ -86,7 +86,7 @@ impl PartialEq for Entry {
 
 #[derive(Debug)]
 pub struct Board {
-	pub entries: [[Entry; NUMBER_LIMIT]; NUMBER_LIMIT],
+	pub entries: [Entry; NUMBER_LIMIT * NUMBER_LIMIT],
 }
 
 impl Board {
@@ -95,29 +95,30 @@ impl Board {
 		/* Instantiate a new Board given a 2D array of numbers to fill with */
 		let mut board = Board { 
 			entries: [
-				[
-					Entry { 
-                        value: 0, 
-                        row: 0, 
-                        col: 0, 
-                        sector: 0,
-                        options: [true; NUMBER_LIMIT]
-                    }; NUMBER_LIMIT
-				]; NUMBER_LIMIT
+				Entry { 
+					value: 0, 
+					row: 0, 
+					col: 0, 
+					sector: 0,
+					options: [true; NUMBER_LIMIT]
+				}; NUMBER_LIMIT * NUMBER_LIMIT
 			]
 		};
 		
 		let mut i: usize;
 		let mut j: usize;
 		i = 0;
-		for row in board.entries.iter_mut() {
-			j = 0;
-			for square in row.iter_mut() {
-				let value = arr[i][j];
-                square.init(i, j, value);
+		j = 0;
+		for square in board.entries.iter_mut() {
+			let value = arr[i][j];
+			square.init(i, j, value);
+
+			i += 1;
+			if i >= NUMBER_LIMIT {
+				// Crossed over to a new column
+				i = 0;
 				j += 1;
 			}
-			i += 1;
 		}
 		return board;
 	}
@@ -134,47 +135,44 @@ impl Board {
 		let mut cols: [[bool; NUMBER_LIMIT]; NUMBER_LIMIT] = [[false; NUMBER_LIMIT]; NUMBER_LIMIT];
 		let mut sectors: [[bool; NUMBER_LIMIT]; NUMBER_LIMIT] = [[false; NUMBER_LIMIT]; NUMBER_LIMIT];
 
-		for row in self.entries.iter() {
-			for entry in row.iter() {
-				if !entry.is_valid() {
-					/* This is out of range, so an error is more appropriate */
-					println!("{}, {} contains invalid entry.", entry.row, entry.col);
+		for entry in self.entries.iter() {
+			if !entry.is_valid() {
+				/* This is out of range, so an error is more appropriate */
+				println!("{}, {} contains invalid entry.", entry.row, entry.col);
+				return false;
+			} else if entry.value != 0 {
+				/* 0 counts as empty */
+
+				if rows[entry.row][entry.value - 1] == true {
+					/* We've seen this entry in this row already */
+					if DEBUG {
+						println!("{}, {}: {} already present in row {}.", entry.row, entry.col, entry.value, entry.row);
+					}
 					return false;
-				} else if entry.value != 0 {
-					/* 0 counts as empty */
-
-					if rows[entry.row][entry.value - 1] == true {
-						/* We've seen this entry in this row already */
-						if DEBUG {
-							println!("{}, {}: {} already present in row {}.", entry.row, entry.col, entry.value, entry.row);
-						}
-						return false;
-					} else {
-						/* Mark that we've seen this entry in this row */
-						rows[entry.row][entry.value - 1] = true;
-					}
-					if cols[entry.col][entry.value  - 1] == true {
-						/* We've seen this entry in this column already */
-						if DEBUG {
-							println!("{}, {}: {} already present in column {}.", entry.row, entry.col, entry.value, entry.col);
-						}
-						return false;
-					} else {
-						/* Mark that we've seen this entry in this column */
-						cols[entry.col][entry.value - 1] = true;
-					}
-					if sectors[entry.sector][entry.value - 1] == true {
-						/* We've seen this entry in this box already */
-						if DEBUG {
-							println!("{}, {}: {} already present in box {}.", entry.row, entry.col, entry.value, entry.sector);
-						}
-						return false;
-					} else {
-						/* Mark that we've seen this entry in this box */
-						sectors[entry.sector][entry.value - 1] = true;
-					}
+				} else {
+					/* Mark that we've seen this entry in this row */
+					rows[entry.row][entry.value - 1] = true;
 				}
-
+				if cols[entry.col][entry.value  - 1] == true {
+					/* We've seen this entry in this column already */
+					if DEBUG {
+						println!("{}, {}: {} already present in column {}.", entry.row, entry.col, entry.value, entry.col);
+					}
+					return false;
+				} else {
+					/* Mark that we've seen this entry in this column */
+					cols[entry.col][entry.value - 1] = true;
+				}
+				if sectors[entry.sector][entry.value - 1] == true {
+					/* We've seen this entry in this box already */
+					if DEBUG {
+						println!("{}, {}: {} already present in box {}.", entry.row, entry.col, entry.value, entry.sector);
+					}
+					return false;
+				} else {
+					/* Mark that we've seen this entry in this box */
+					sectors[entry.sector][entry.value - 1] = true;
+				}
 			}
 		}
 
@@ -183,27 +181,29 @@ impl Board {
 
     /* Returns true if all values have been filled in and are valid */
     pub fn is_solved(&self) -> bool {
-		for row in self.entries.iter() {
-			for entry in row.iter() {
-                if entry.value == 0 {
-                    return false;
-                }
-            }
+		for entry in self.entries.iter() {
+			if entry.value == 0 {
+				return false;
+			}
         }
         return self.is_valid();
     }
 	
 	pub fn print(&self) {
 		/* Prints out the entire board in a pretty format. */
-		/* Note that this print statement is probably inefficient. Consider preallocation if 
-		   this is slow. */
-		for row in self.entries.iter() {
-			let mut row_str = String::from("");
-			for square in row.iter() {
-				row_str.push_str(&square.value.to_string());
-				row_str.push_str(", ")
+		let mut i = 0;
+		let mut row_str = String::from("");
+		for square in self.entries.iter() {
+			row_str.push_str(&square.value.to_string());
+			row_str.push_str(", ");
+			i += 1;
+			
+			if i >= NUMBER_LIMIT {
+				// Row done, print and move on to the next one
+				println!("{}", row_str);
+				row_str = String::from("");
+				i = 0;
 			}
-			println!("{}", row_str);
 		}
 	}
 }
