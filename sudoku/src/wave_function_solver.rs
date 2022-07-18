@@ -12,6 +12,13 @@
 use crate::board::Board;
 use crate::board::Entry;
 
+pub fn solve(board: &mut Board) {
+    // Start by making sure all the options are resolved according to sudoku rules
+    collapse_options(board);
+
+    // TODO guess, collapse, and repeat
+}
+
 /* Takes a board and removes all options that are invalidated by basic Sudoku rules
    (meaning those options that already exist in their row, column, or sector) */
 pub fn collapse_options(board: &mut Board) {

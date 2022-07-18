@@ -114,10 +114,12 @@ mod tests {
 			[6, 7, 8, 9, 1, 2, 3, 4, 5],
 			[9, 1, 2, 3, 4, 5, 6, 7, 8]];
 
-		let test_board = Board::new_from_array(near_complete_array);
+		let mut test_board = Board::new_from_array(near_complete_array);
 
 		assert_eq!(true, test_board.is_valid());
 		assert_eq!(false, test_board.is_solved());
+
+		crate::wave_function_solver::solve(&mut test_board)
 
 		// TODO solve and revalidate
 
