@@ -18,11 +18,7 @@ pub fn solve(board: &mut Board) -> bool {
     // Start by making sure all the options are resolved according to sudoku rules
     collapse_options(board);
 
-    // TODO guess, collapse, and repeat
-    // TODO sort for smallest number of options
-
     // First, create an array of the unfilled entries
-    //let mut entriesAsVec: Vec<Entry> = board.entries.iter().cloned().collect();
     let entries_as_vec_ref: Vec<&Entry> = board.entries.iter().collect();
     let mut unfilled_entries: Vec<&Entry> = entries_as_vec_ref.iter().cloned().filter(|e| e.value == 0).collect();
     if unfilled_entries.len() == 0 {
@@ -36,7 +32,7 @@ pub fn solve(board: &mut Board) -> bool {
                            &b.options.iter().filter(|c| **c == true).count()));
     let guess = unfilled_entries[0];
 
-    // For simplicity, we just find the first of the options that is possible and guess it.
+    // For simplicity, just find the first of the options that is possible and guess it.
     let mut guess_value = 0;
     for i in 0..NUMBER_LIMIT {
         if guess.options[i] == true {
@@ -52,7 +48,7 @@ pub fn solve(board: &mut Board) -> bool {
             }
 
             if solve(&mut new_board) {
-                // Our guess was successful, so pass it up the chain
+                // The guess was successful, so pass the solved board up the chain
                 *board = new_board;
                 return true;
             }

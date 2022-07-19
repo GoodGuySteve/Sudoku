@@ -8,20 +8,21 @@ mod wave_function_solver;
 fn main() {
 
 	let test_array = 
-	[[1, 2, 3, 4, 5, 6, 7, 8, 9],
-			[4, 5, 6, 7, 8, 9, 1, 2, 3],
-			[7, 8, 9, 1, 2, 3, 4, 5, 6],
-			[2, 3, 4, 5, 6, 7, 8, 9, 1],
-			[5, 6, 0, 8, 9, 1, 2, 3, 4],
-			[8, 9, 1, 2, 3, 4, 5, 6, 7],
-			[3, 4, 5, 6, 7, 8, 9, 1, 2],
-			[6, 7, 8, 9, 1, 2, 3, 4, 5],
-			[9, 1, 2, 3, 4, 5, 6, 7, 8]];
+		   [[0, 0, 0, 4, 0, 5, 0, 0, 0],
+			[0, 0, 9, 0, 6, 0, 0, 8, 0],
+			[5, 0, 0, 0, 0, 8, 0, 7, 4],
+			[0, 0, 0, 3, 9, 6, 2, 0, 0],
+			[0, 3, 2, 1, 0, 7, 4, 0, 6],
+			[1, 0, 6, 0, 8, 4, 0, 0, 0],
+			[0, 8, 0, 0, 7, 2, 5, 3, 1],
+			[0, 5, 7, 0, 3, 0, 0, 4, 0],
+			[6, 0, 3, 5, 4, 0, 0, 2, 0]];
 
 	let mut test_board = Board::new_from_array(&test_array);
 	println!("board before solve: ");
 	test_board.print();
 	println!("-----------------------------");
+
 	crate::wave_function_solver::solve(&mut test_board);
 	test_board.print();
 
@@ -155,7 +156,7 @@ mod tests {
 			[0, 0, 0, 3, 9, 6, 2, 0, 0],
 			[0, 3, 2, 1, 0, 7, 4, 0, 6],
 			[1, 0, 6, 0, 8, 4, 0, 0, 0],
-			[0, 8, 0, 0, 7, 2, 6, 3, 1],
+			[0, 8, 0, 0, 7, 2, 5, 3, 1],
 			[0, 5, 7, 0, 3, 0, 0, 4, 0],
 			[6, 0, 3, 5, 4, 0, 0, 2, 0]];
 
@@ -168,5 +169,7 @@ mod tests {
 		assert_eq!(true, test_board.is_valid());
 		assert_eq!(true, test_board.is_solved());
 	}
+
+	// TODO need a test complicated enough to use backtracking
 
 }
