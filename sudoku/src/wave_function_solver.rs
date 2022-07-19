@@ -38,9 +38,9 @@ pub fn solve(board: &mut Board) -> bool {
 
     // For simplicity, we just find the first of the options that is possible and guess it.
     let mut guess_value = 0;
-    for i in 1..(NUMBER_LIMIT) {
-        if guess.options[i - 1] == true {
-            guess_value = i;
+    for i in 0..NUMBER_LIMIT {
+        if guess.options[i] == true {
+            guess_value = i + 1;
 
             // Now try putting the guess in the cell and solving.
             let mut new_board = board.clone();
@@ -69,9 +69,9 @@ pub fn solve(board: &mut Board) -> bool {
 /* Takes a board and removes all options that are invalidated by basic Sudoku rules
    (meaning those options that already exist in their row, column, or sector) */
 pub fn collapse_options(board: &mut Board) {
-    for row in 0..(NUMBER_LIMIT - 1) {
-        for col in 0..(NUMBER_LIMIT - 1) {
-            for option_index in 0..(NUMBER_LIMIT - 1) {
+    for row in 0..NUMBER_LIMIT {
+        for col in 0..NUMBER_LIMIT {
+            for option_index in 0..NUMBER_LIMIT {
                 let entry = &board.entries[entry_index(row, col)];
                 /* Options is an array of booleans, with each index corresponding to 
                    a value. Since Sudoku is 0-indexed, we need to add 1 */

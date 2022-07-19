@@ -17,7 +17,7 @@ pub fn box_num(row: usize, col: usize) -> usize {
 }
 
 pub fn entry_index(row: usize, col: usize) -> usize {
-	return col * NUMBER_LIMIT + row;
+	return row * NUMBER_LIMIT + col;
 }
 
 /* TODO I might not be able to pass around the pointer to this struct with Copy derived */
@@ -109,19 +109,19 @@ impl Board {
 			]
 		};
 		
-		let mut i: usize;
-		let mut j: usize;
-		i = 0;
-		j = 0;
+		let mut row: usize;
+		let mut col: usize;
+		row = 0;
+		col = 0;
 		for square in board.entries.iter_mut() {
-			let value = arr[j][i];
-			square.init(i, j, value);
+			let value = arr[row][col];
+			square.init(row, col, value);
 
-			i += 1;
-			if i >= NUMBER_LIMIT {
-				// Crossed over to a new column
-				i = 0;
-				j += 1;
+			col += 1;
+			if col >= NUMBER_LIMIT {
+				// Crossed over to a new row
+				col = 0;
+				row += 1;
 			}
 		}
 		return board;
