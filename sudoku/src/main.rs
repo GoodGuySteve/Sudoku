@@ -8,15 +8,15 @@ mod wave_function_solver;
 fn main() {
 
 	let test_array = 
-		   [[0, 0, 0, 4, 0, 5, 0, 0, 0],
-			[0, 0, 9, 0, 6, 0, 0, 8, 0],
-			[5, 0, 0, 0, 0, 8, 0, 7, 4],
-			[0, 0, 0, 3, 9, 6, 2, 0, 0],
-			[0, 3, 2, 1, 0, 7, 4, 0, 6],
-			[1, 0, 6, 0, 8, 4, 0, 0, 0],
-			[0, 8, 0, 0, 7, 2, 5, 3, 1],
-			[0, 5, 7, 0, 3, 0, 0, 4, 0],
-			[6, 0, 3, 5, 4, 0, 0, 2, 0]];
+	[[0, 2, 0, 0, 0, 4, 0, 9, 7],
+	[3, 0, 0, 2, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 1, 0],
+	[0, 3, 0, 0, 0, 9, 0, 2, 4],
+	[0, 0, 0, 0, 0, 0, 8, 0, 0],
+	[0, 0, 5, 0, 6, 0, 0, 0, 0],
+	[0, 7, 0, 0, 0, 0, 1, 0, 0],
+	[0, 0, 0, 0, 0, 8, 3, 0, 0],
+	[6, 0, 0, 0, 9, 0, 0, 7, 8]];
 
 	let mut test_board = Board::new_from_array(&test_array);
 	println!("board before solve: ");
@@ -146,6 +146,7 @@ mod tests {
 		assert_eq!(true, test_board.is_valid());
 		assert_eq!(true, test_board.is_solved());
 	}
+
 	#[test]
 	fn very_easy_solve2() {
 
@@ -161,6 +162,7 @@ mod tests {
 			[6, 0, 3, 5, 4, 0, 0, 2, 0]];
 
 		let mut test_board = Board::new_from_array(&test_array);
+		test_board.print();
 
 		assert_eq!(true, test_board.is_valid());
 		assert_eq!(false, test_board.is_solved());
@@ -170,6 +172,28 @@ mod tests {
 		assert_eq!(true, test_board.is_solved());
 	}
 
-	// TODO need a test complicated enough to use backtracking
+	#[test]
+	fn very_hard_solve() {
+
+		let test_array = 
+		   [[0, 2, 0, 0, 0, 4, 0, 9, 7],
+			[3, 0, 0, 2, 0, 0, 0, 0, 0],
+			[0, 0, 0, 0, 0, 0, 0, 1, 0],
+			[0, 3, 0, 0, 0, 9, 0, 2, 4],
+			[0, 0, 0, 0, 0, 0, 8, 0, 0],
+			[0, 0, 5, 0, 6, 0, 0, 0, 0],
+			[0, 7, 0, 0, 0, 0, 1, 0, 0],
+			[0, 0, 0, 0, 0, 8, 3, 0, 0],
+			[6, 0, 0, 0, 9, 0, 0, 7, 8]];
+
+		let mut test_board = Board::new_from_array(&test_array);
+
+		assert_eq!(true, test_board.is_valid());
+		assert_eq!(false, test_board.is_solved());
+
+		assert_eq!(true, crate::wave_function_solver::solve(&mut test_board));
+		assert_eq!(true, test_board.is_valid());
+		assert_eq!(true, test_board.is_solved());
+	}
 
 }
