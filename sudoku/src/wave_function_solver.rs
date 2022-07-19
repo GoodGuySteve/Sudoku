@@ -7,7 +7,7 @@
       options to guess from
 */
 use crate::constants::NUMBER_LIMIT;
-//use constants::DEBUG;
+use crate::constants::DEBUG_SOLVER_STEPS;
 
 use crate::board::Board;
 use crate::board::Entry;
@@ -45,7 +45,12 @@ pub fn solve(board: &mut Board) -> bool {
             // Now try putting the guess in the cell and solving.
             let mut new_board = board.clone();
             new_board.entries[entry_index(guess.row, guess.col)].value = guess_value;
-        
+
+            if DEBUG_SOLVER_STEPS {
+                println!("Trying guess of value {} at row {}, col {}", guess_value, guess.row, guess.col);
+                new_board.print();
+            }
+
             if solve(&mut new_board) {
                 // Our guess was successful, so pass it up the chain
                 *board = new_board;
@@ -64,27 +69,15 @@ pub fn solve(board: &mut Board) -> bool {
 /* Takes a board and removes all options that are invalidated by basic Sudoku rules
    (meaning those options that already exist in their row, column, or sector) */
 pub fn collapse_options(board: &mut Board) {
-    /*for board_line in board.entries.iter_mut() {
-        for entry in board_line.iter_mut() {
-            for option_index in 0..(entry.options.len() - 1) {
-                /* Options is an array of booleans, with each index corresponding to 
-                   a value. Since Sudoku is 0-indexed, we need to add 1 */
-                if entry.options[option_index] && !can_entry_have_value(board, entry, option_index + 1) {
-                    entry.options[option_index] = false;
-                }
-            }
-        }
-    }*/
     for row in 0..(NUMBER_LIMIT - 1) {
         for col in 0..(NUMBER_LIMIT - 1) {
-            let entry = &board.entries[entry_index(row, col)];
-            for option_index in 0..(entry.options.len() - 1) {
+            for option_index in 0..(NUMBER_LIMIT - 1) {
+                let entry = &board.entries[entry_index(row, col)];
                 /* Options is an array of booleans, with each index corresponding to 
                    a value. Since Sudoku is 0-indexed, we need to add 1 */
                 if entry.options[option_index] && !can_entry_have_value(board, entry, option_index + 1) {
-                    // TODO I think something is copying around here where it shouldn't be
-                    let mut options = board.entries[entry_index(row, col)].options;
-                    options[option_index] = false;
+                    let options = &mut board.entries[entry_index(row, col)].options;
+                    (*options)[option_index] = false;
                 }
             }
         }

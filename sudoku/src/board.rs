@@ -94,7 +94,7 @@ pub struct Board {
 }
 
 impl Board {
-	pub fn new_from_array(arr: [[usize; NUMBER_LIMIT]; NUMBER_LIMIT])
+	pub fn new_from_array(arr: &[[usize; NUMBER_LIMIT]; NUMBER_LIMIT])
 	-> Board {
 		/* Instantiate a new Board given a 2D array of numbers to fill with */
 		let mut board = Board { 
@@ -114,7 +114,7 @@ impl Board {
 		i = 0;
 		j = 0;
 		for square in board.entries.iter_mut() {
-			let value = arr[i][j];
+			let value = arr[j][i];
 			square.init(i, j, value);
 
 			i += 1;
